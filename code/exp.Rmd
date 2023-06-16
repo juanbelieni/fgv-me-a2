@@ -16,33 +16,37 @@ Nesta exploração de dados, vou buscar entender como cada variável se comporta
 
 ### Variáveis
 
-Carregando os dados:
-
 ```{r}
 data <- read_csv("./data/indicadores-2012.csv") %>%
+  filter(modalidade_ensino == 1 & ano_integralizacao == ano_referencia) %>%
   mutate(
-    regiao = case_when(
+    administracao = as.factor(administracao),
+    tipo_administracao = as.factor(case_when(
+      administracao %in% c(1, 2, 3) ~ "Pública",
+      administracao %in% c(4, 5) ~ "Privada",
+      administracao == 7 ~ "Especial"
+    )),
+    org_academica = as.factor(org_academica),
+    cod_curso = as.factor(cod_curso),
+    cod_regiao = as.factor(case_when(
       cod_regiao == 1 ~ "Norte",
       cod_regiao == 2 ~ "Nordeste",
       cod_regiao == 3 ~ "Sudeste",
       cod_regiao == 4 ~ "Sul",
-      cod_regiao == 5 ~ "Centro-Oeste"
-    ),
-    tipo_administracao = case_when(
-      administracao %in% c(1, 2, 3) ~ "Pública",
-      administracao %in% c(4, 5) ~ "Privada",
-      administracao == 7 ~ "Especial"
-    ),
+      cod_regiao == 5 ~ "Centro-Oeste",
+      TRUE ~ "Outro"
+    )),
+    cod_area = as.factor(cod_area),
+    modalidade_ensino = as.factor(modalidade_ensino),
+    grau_academico = as.factor(grau_academico),
+    razao_evasao = qt_desistencias / qt_ingressantes,
   )
 ```
-
-As variáveis que temos são:
 
 ```{r}
 data %>% names()
 ```
 
-Descrevendo as variáveis:
 
 ```{r}
 data %>% glimpse()
@@ -50,9 +54,7 @@ data %>% glimpse()
 
 ## Gráficos
 
-Vamos começar com o número de instituições para cada categoria administrativa:
-
-```{r echo=FALSE}
+```{r}
 data %>%
   group_by(cod_ies, administracao, tipo_administracao) %>%
   summarise(n = n()) %>%
@@ -77,9 +79,7 @@ lucrativos
 lucrativos
 7. Especial
 
-Como é possível observar, há uma grande representatividade de instituições privadas. Porém, também podemos olhar para o número de alunos por categoria administrativa:
-
-```{r echo=FALSE}
+```{r}
 data %>%
   group_by(administracao, tipo_administracao) %>%
   summarise(n = sum(qt_ingressantes)) %>%
@@ -93,9 +93,7 @@ data %>%
   )
 ```
 
-Aqui, ainda há predominância das instituições privadas, porém, a diferença diminuiu. Agora, vamos olhar para a distribuição de alunos por região:
-
-```{r echo=FALSE}
+```{r}
 data %>%
   group_by(regiao) %>%
   summarise(n = sum(qt_ingressantes)) %>%
@@ -108,13 +106,28 @@ data %>%
   )
 ```
 
+```{r}
+# plot prazo_integralizacao vs qt_desistencias
+data %>%
+  ggplot(aes(x = prazo_integralizacao, y = qt_desistencias)) +
+  geom_point() +
+  # regreção polinomial de grau 2
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) +
+  labs(
+    x = "Prazo de integralização",
+    y = "Número de desistentes",
+    title = "Número de desistentes por prazo de integralização"
+  )
+```
+
+```{r}
+```
+
 ## Exploração da evasão
 
 ### Gráficos
 
-Primeiramente, vamos olhar a distribuição de ingressantes e desistentes por região:
-
-```{r echo=FALSE}
+```{r}
 data %>%
   group_by(regiao) %>%
   summarise(
@@ -132,35 +145,29 @@ data %>%
   )
 ```
 
-Olhando apenas a as desistências, como um histograma:
-
-```{r echo=FALSE}
+```{r}
 data %>%
   ggplot(aes(x = qt_desistencias)) +
   geom_histogram(bins = 50) +
   labs(
     x = "Número de desistentes",
     y = "Frequência",
-    title = "Histograma do número de desistentes por região"
+    title = "Histograma do número de desistentes"
   )
 ```
 
-E também o de ingressantes:
-
-```{r echo=FALSE}
+```{r}
 data %>%
   ggplot(aes(x = qt_ingressantes)) +
   geom_histogram(bins = 50) +
   labs(
     x = "Número de ingressantes",
     y = "Frequência",
-    title = "Histograma do número de ingressantes por região"
+    title = "Histograma do número de ingressantes"
   )
 ```
 
-Agora, vamos olhar para a evasão. Primeiro, vamos olhar para a evasão por região, observando a diferença entre os tipos de administração:
-
-```{r echo=FALSE}
+```{r}
 data %>%
   group_by(regiao, tipo_administracao) %>%
   summarise(
@@ -176,9 +183,7 @@ data %>%
   )
 ```
 
-Temos uma taxa de evasão maior nas instituições privadas, exceto nos lugares onde a região não é especificada. Agora, vamos olhar para a evasão pela grande área de conhecimento:
-
-```{r echo=FALSE}
+```{r}
 data %>%
   group_by(nome_area) %>%
   summarise(
@@ -199,11 +204,7 @@ data %>%
   scale_y_discrete(labels = function(x) str_wrap(x, width = 30))
 ```
 
-A área de computação, engenharia e ciências exatas possuem as maiores taxas de evasão.
-
-Agora vamos ver se temos outliers no número de ingressantes e no número de desistências:
-
-```{r echo=FALSE}
+```{r}
 data %>%
   group_by(cod_ies) %>%
   summarise(
@@ -225,55 +226,40 @@ data %>%
   )
 ```
 
-### Modelos
-
-Agora, vamos tentar prever a taxa de evasão. Para isso, vamos utilizar um GLM. Primeiro, vamos separar os dados em treino e teste:
-
 ```{r}
-set.seed(42)
-
-model_data <- data %>%
-  mutate(
-    administracao = as.factor(administracao),
-    cod_regiao = as.factor(cod_regiao),
-    cod_area = as.factor(cod_area),
-    razao_evasao = qt_desistencias / qt_ingressantes,
+data %>%
+  mutate(razao_evasao = qt_desistencias / qt_ingressantes) %>%
+  ggplot(aes(x = razao_evasao)) +
+  geom_histogram(bins = 100) +
+  labs(
+    x = "Razão de desistências por ingressantes",
+    y = "Frequência",
+    title = "Histograma da razão de desistências por ingressantes"
   )
-
-train_index <- sample(seq_len(nrow(model_data)), size = 0.9 * nrow(data))
-
-train <- model_data[train_index, ]
-test <- model_data[-train_index, ]
-```
-
-Agora, vamos treinar o modelo:
-
-```{r}
-model <- glm(
-  razao_evasao ~ cod_area
-    + administracao
-    + cod_regiao
-    + prazo_integralizacao
-    + qt_ingressantes,
-  data = train,
-  family = binomial(link = "logit")
-)
-
-summary(model)
-```
-
-Vamos medir o RMSE:
-
-```{r}
-predicted <- predict(model, test)
-predicted[is.na(predicted)] <- 0
-sqrt(mean((predicted - test$razao_evasao)^2))
 ```
 
 ```{r}
-# print the index of top 5 max absolute errors
-order(abs(predicted - test$qt_desistencias), decreasing = TRUE)[1:5]
+data %>%
+  filter(qt_desistencias > 0) %>%
+  mutate(razao_evasao = qt_desistencias / qt_ingressantes) %>%
+  sample_n(10000) %>%
+  ggplot(aes(x = as.factor(administracao), y = razao_evasao)) +
+  geom_boxplot() +
+  labs(
+    x = "Administração",
+    y = "Razão de desistências por ingressantes",
+    title = "Boxplot da razão de desistências por ingressantes por prazo de integralização"
+  )
 ```
 
 ```{r}
+data %>%
+  filter(modalidade_ensino == 1) %>%
+  ggplot(aes(x = qt_desistencias)) +
+  geom_histogram(bins = 100) +
+  labs(
+    x = "Quantidade de desistências",
+    y = "Frequência",
+    title = "Histograma da quantidade de desistências por ingressantes"
+  )
 ```
