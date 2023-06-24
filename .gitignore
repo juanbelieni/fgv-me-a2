@@ -1,6 +1,9 @@
-*.pdf
+# --- Important ---
 
-# ---
+*.pdf
+*.png
+
+# --- R ---
 
 # History files
 .Rhistory
