@@ -1,4 +1,4 @@
-e#import "template.typ": *
+#import "template.typ": *
 
 #show: project.with(
   title: "Modelagem da evasão\nno ensino superior no Brasil",
@@ -10,15 +10,15 @@ e#import "template.typ": *
 
 = Introdução
 
-A evasão no ensino superior é um problema que afeta muitos cursos acadêmicos pelo país, e possui diversas naturezas ao nível do estudante, tais como vocacional, relativos ao desempenho ou até sociais~@ambiel-2021. No entanto, fatores macros também podem ajudar a entender efeitos globais do fenômeno de evasão, como a modalidade de ensino do curso.
+A evasão no ensino superior é um problema que afeta muitos cursos acadêmicos pelo Brasil, e possui diversas naturezas ao nível do estudante, tais como vocacionais, relativos ao desempenho ou até sociais~@ambiel-2021. No entanto, fatores macros também podem ajudar a entender efeitos globais do fenômeno de evasão, como a modalidade de ensino do curso e o tipo de administração da instituição de ensino.
 
-A motivação de modelar esse fenômeno surge da necessidade de entender como fatores macro  influenciam a persistência dos estudantes.
+Modelar esse fenômeno dá a possibilidade de entender como esse fatores se relacionam e influenciam a quantidade de desistências, permitindo identificar situações anômalas ou até tendências indesejáveis, que possibilitaria planos de ação a nível nacional para o desenvolvimento de programas de combate a evasão em instituições públicas e privadas.
+
+Dessa forma, a discussão e a modelagem iniciada nesse trabalho busca explorar os dados oferecidos pelo Inep para entender o comportamento dessa variáveis em modelos de regressão para contagem em relação a quantidade de desistências em cada curso do conjunto de dados.
 
 = Dados <sec:dados>
 
-Os dados desse trabalho foram coletados pelo Censo da Educação Superior, realizado anualmente pelo Inep~@inep, e disponibilizados no formato CSV no repositório do trabalho #footnote(link("https://github.com/juanbelieni/fgv-me-a2")).
-
-Cada entrada do conjunto de dados possui informações ao nível de curso por instituição em um determinado ano de referência. A cada ano, a partir do ano de ingresso, é registrado a quantidade de alunos que concluíram e desistiram do curso, além do número de falecidos nesse determinado ano. Para esse trabalho, o ano de ingresso escolhido para a modelagem foi 2012.
+Os dados desse trabalho foram coletados pelo Censo da Educação Superior, realizado anualmente pelo Inep~@inep, e disponibilizados no formato CSV no repositório do trabalho #footnote(link("https://github.com/juanbelieni/fgv-me-a2")). Cada entrada do conjunto de dados possui informações ao nível de curso por instituição em um determinado ano de referência. A cada ano, a partir do ano de ingresso, é registrado a quantidade de alunos que concluíram e desistiram do curso, além do número de falecidos nesse determinado ano. Para esse trabalho, o ano de ingresso escolhido para a modelagem foi 2012.
 
 Cada curso no conjunto conta com os seguintes dados:
 - identificação (código e nome);
@@ -153,9 +153,9 @@ Em relação às variáveis categóricas, algumas destas acabam tendo naturalmen
   ]
 ) <img:evasao-por-regiao>
 
-A diferença que se destaca, nesse caso, é a maior representatividade na proporção do percentual de evasão quando a classificação de região não se aplica. No conjunto de dados, essa classificação significa que o curso é ofertado a distância. Dessa maneira, conseguímos utilizar a variável que informa a modalidade de ensino para codificar essa discrepância.
+A diferença que se destaca, nesse caso, é a maior representatividade no percentual de evasão quando a classificação de região não se aplica. No conjunto de dados, essa classificação significa que o curso é ofertado a distância. Dessa maneira, conseguímos utilizar a variável que informa a modalidade de ensino para codificar essa discrepância.
 
-Também é possível ver alterações significativas na proporção do percentual de evasão quando analisamos esse valor em relação ao tipo de administração:
+Também é possível ver alterações significativas no percentual de evasão quando analisamos esse valor em relação ao tipo de administração na @img:desistencias-por-grau-academico.
 
 #figure(
   image(
@@ -163,7 +163,7 @@ Também é possível ver alterações significativas na proporção do percentua
     width: 100%
   ),
   caption: [
-    Gráfico da proporção da taxa de evasão em relação ao tipo de adminstração.
+    Gráfico da proporção da taxa de evasão em relação ao tipo de administração.
   ]
 ) <img:desistencias-por-grau-academico>
 
@@ -176,7 +176,7 @@ Por fim, o modelo escolhido foi uma regressão Binomial Negativa que leva em con
 ```R
 glm.nb(
   qt_desistencias ~ 1
-    + grau_academico
+    + modalidade_ensino
     + tipo_administracao
     + as.factor(prazo_integralizacao)
     + log(qt_ingressantes),
@@ -293,12 +293,14 @@ Essa hipótese pode ser avaliada ao testar se os resíduos são normalmente dist
 
 Mesmo com o ajuste não ideal do modelo, ainda é pertinente interpretar seus coeficientes e resultados. Primeiramente, a hipótese inicial da forte relação entre a quantidade de ingressantes e desistências é percebido claramente na covariável "quantidade de ingressantes (log)", pois a estimativa para seu coeficiente foi a que mais teve evidência de ser diferente de zero.
 
-A modalidade presencial também influência positivamente para um número menor de desistências. Isso é natural de se esperar dado que os cursos a distância foram aqueles com o maior número de alunos ingressantes no conjunto de dados. No entanto, cursos a distância possuem características únicas que tornam essa modalidade mais suscetíveis à evasão, como a falta de uma infraestrutura física robusta para o aprendizado, dificuldades inerentes ao meio digital como a falta de _feedbacks_ e apoio ao aluno, a demografia dos estudantes e outros fatores que prejudicam o processo de aprendizado~@almeida-2013.
+Em relação as variáveis categóricas, podemos começar percebendo que cursos com a modalidade de ensino presencial possuem uma taxa menor de desistências. Esse resultado pode ser compreendido ao perceber que cursos a distância possuem características únicas que tornam essa modalidade mais suscetíveis à evasão, como a falta de uma infraestrutura física robusta para o aprendizado, dificuldades inerentes ao meio digital como a falta de _feedbacks_ e apoio ao aluno, a demografia dos estudantes e outros fatores que prejudicam o processo de aprendizado~@almeida-2013.
 
-Os prazos de integralização retornaram resultados coerentes para os coeficientes em relação à análise exploratória dos dados. No entanto, assim como aconteceu na análise exploratória, cursos com prazo de integralização igual a 7 anos possuem uma quantidade de desistências menor do que em relação a cursos que possuem esse valor igual a 6 ou 8 anos. Isso pode ser devido à abundância de cursos de medicina nessa categoria, nos quais já foi observado uma menor taxa de evasão em relação a outros cursos~@silva-2007.
+Analisando os coeficientes para instituições com administrações públicas e privadas, é observado que cursos de instituições privadas são aqueles com maior taxa de evasão. Muitos podem ser os motivos para esse fenômeno, porém diferenças em como cada tipo de administração lida com avaliações institucionais e realiza processos de estudo do motivo de saída dos alunos podem ser uma pista~@baggi-2011.
+
+Os prazos de integralização, por sua vez, retornaram resultados coerentes para os coeficientes em relação à análise exploratória dos dados. No entanto, assim como aconteceu na análise exploratória, cursos com prazo de integralização igual a 7 anos possuem uma quantidade de desistências menor do que em relação a cursos que possuem esse valor igual a 6 ou 8 anos. Isso pode ser devido à abundância de cursos de medicina nessa categoria, nos quais já foi observado uma menor taxa de evasão em relação a outros cursos~@silva-2007.
 
 == Limitações e trabalho futuro
 
-As limitações da modelagem desenvolvida nesse trabalho se concentram principalmente na construção de um modelo que corresponda corretamente aos dados. Possivelmente, teria sido mais interessante ter construído um modelo que levasse mais em conta as diferenças entre as modalidades de ensino presencial e a distância. Mais do que isso, a construção de um modelo que conseguisse modelar a evolução do número de desistências ao longo dos anos de acompanhamento produziria, possivelmente, uma melhor análise do processo de evasão.
+As limitações da modelagem desenvolvida nesse trabalho se concentram principalmente na construção de um modelo que corresponda corretamente aos dados. Possivelmente, teria sido mais interessante ter construído um modelo que levasse mais em conta as diferenças entre as modalidades de ensino presencial e a distância. Mais do que isso, a construção de um modelo que conseguisse lidar individualmente com o número de desistências ao longo dos anos de acompanhamento e modelar essa evolução produziria, possivelmente, uma melhor análise do processo de evasão.
 
 Isto posto, para continuar o desenvolvimento da modelagem feito nesse trabalho, é imprescindível a utilização de dados de outros anos disponibilizados pelo Inep, já que seria possível também estudar a mudança no comportamento da evasão no ensino superior ao longo dos últimos anos e relacionar com eventos e mudanças importantes da última década, como o aumento significativo do acesso à Internet.

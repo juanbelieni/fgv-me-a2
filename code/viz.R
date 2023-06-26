@@ -17,6 +17,7 @@ source("./code/data.R")
 
 theme_set(theme_bw(
   base_size = 14,
+  base_family = "serif",
 ))
 
 theme_update(
@@ -105,23 +106,16 @@ save_plot("evasao-por-regiao")
 # Plot: percentual de evasão por tipo de administração
 
 data %>%
-  ggplot(aes(evasao, fill = tipo_administracao)) +
-  geom_density(
-    position = "fill",
-    alpha = 0.75,
-  ) +
-  scale_x_continuous(
-    labels = scales::percent,
-    expand = c(0, 0),
+  ggplot(aes(x = tipo_administracao, y = evasao)) +
+  geom_boxplot(
   ) +
   scale_y_continuous(
     labels = scales::percent,
     expand = c(0, 0),
   ) +
   labs(
-    x = "Percentual de evasão",
-    y = "Proporção",
-    fill = "Tipo de administração",
+    x = "Tipo de administração",
+    y = "Percentual de evasão"
   )
 
 save_plot("evasao-por-tipo-administracao")
@@ -130,7 +124,6 @@ save_plot("evasao-por-tipo-administracao")
 
 model_nb <- glm.nb(
   qt_desistencias ~ 1
-    + grau_academico
     + modalidade_ensino
     + tipo_administracao
     + as.factor(prazo_integralizacao)

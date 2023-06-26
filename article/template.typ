@@ -4,18 +4,17 @@
 
   set document(
     author: authors.map(a => a.name),
-    title: title,
+    title: title
   )
 
   set page(
     numbering: "1",
-    number-align: center,
+    number-align: center
   )
 
   set text(
     lang: "pt",
     region: "br",
-    font: "New Computer Modern Sans",
     size: 11pt
   )
 
@@ -37,9 +36,7 @@
   // --- Authors ---
 
   pad(
-    top: 1em,
-    bottom: 1.5em,
-    x: 2em,
+    y: 1em,
     grid(
       columns: (1fr,) * calc.min(3, authors.len()),
       gutter: 1em,
@@ -54,7 +51,7 @@
   // --- Outline --
 
   pad(
-    bottom: 1em,
+    bottom: 0.5em,
     outline()
   )
 
@@ -63,7 +60,12 @@
   set math.equation(numbering: "(1)")
   set par(justify: true)
 
-  show figure: it => pad(bottom: 1em, it)
+  show figure: it => pad(y: 0.5em, it)
+  show raw: it => if it.at("block") {
+    block(breakable: false, it)
+  } else {
+    it
+  }
 
   body
 
