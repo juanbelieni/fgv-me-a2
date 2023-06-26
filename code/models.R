@@ -7,6 +7,8 @@
 library(ggplot2)
 library(MASS) # negative binomial models
 library(AER) # dispersion tests
+library(countreg) # RQR
+library(nortest) # normality tests
 source("./code/data.R")
 
 # --- Data ---
@@ -14,12 +16,6 @@ source("./code/data.R")
 data <- read_data()
 
 # --- Functions ---
-
-qq_plot <- function(model, plot_title = "", type = "pearson") {
-  residuals <- resid(model, type = type)
-  qqnorm(residuals, main = plot_title)
-  qqline(residuals)
-}
 
 metrics <- function(model) {
   predicted <- predict(model, data, type = "response")
@@ -42,63 +38,37 @@ metrics <- function(model) {
 
 # Poisson
 
-f_model_poisson <- glm(
+model_poisson <- glm(
   qt_desistencias ~ 1
-    + grau_academico
     + modalidade_ensino
+    + tipo_administracao
     + as.factor(prazo_integralizacao)
     + log(qt_ingressantes),
   data = data,
   family = poisson,
 )
 
-summary(f_model_poisson)
-summary(resid(f_model_poisson, type = "response"))
-metrics(f_model_poisson)
+resids_poisson <- qresiduals(model_poisson)
 
-qq_plot(
-  f_model_poisson,
-  plot_title = "Poisson GLM - QQ Plot",
-  type = "pearson"
-)
-
-resid(f_model_poisson, type = "pearson") %>%
-  as.data.frame() %>%
-  ggplot(aes(x = .)) +
-  geom_histogram(bins = 100) +
-  labs(
-    title = "Histogram of Poisson GLM residuals",
-    x = "Residuals",
-    y = "Frequency"
-  )
+summary(model_poisson)
+metrics(model_poisson)
+dispersiontest(model_poisson)
+summary(resids_poisson)
 
 # Negative Binomial
 
-f_model_nb <- glm.nb(
+model_nb <- glm.nb(
   qt_desistencias ~ 1
-    + grau_academico
     + modalidade_ensino
+    + tipo_administracao
     + as.factor(prazo_integralizacao)
     + log(qt_ingressantes),
   data = data,
 )
 
-summary(f_model_nb)
-summary(resid(f_model_nb, type = "pearson"))
-metrics(f_model_nb)
+resids_nb <- qresiduals(model_nb)
 
-qq_plot(
-  f_model_nb,
-  plot_title = "Negative Binomial GLM - QQ Plot",
-  type = "pearson"
-)
-
-resid(f_model_nb, type = "pearson") %>%
-  as.data.frame() %>%
-  ggplot(aes(x = .)) +
-  geom_histogram(bins = 100) +
-  labs(
-    title = "Histogram of Poisson GLM residuals",
-    x = "Residuals",
-    y = "Frequency"
-  )
+summary(model_nb)
+metrics(model_nb)
+summary(resids_nb)
+ad.test(resids_nb)

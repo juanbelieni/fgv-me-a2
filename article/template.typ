@@ -22,14 +22,9 @@
   set heading(numbering: "1.1")
   show heading: it => pad(bottom: 0.25em, it)
 
-  set math.equation(
-    numbering: "(1)",
-
-  )
-
   show link: underline
 
-  show figure: it => pad(bottom: 1em, it)
+
 
   // --- Title ---
 
@@ -56,17 +51,26 @@
     ),
   )
 
-  // --- Hacks ---
+  // --- Outline --
 
-  show " and ": " e "
-  show " Available: ": " Disponível em: "
+  pad(
+    bottom: 1em,
+    outline()
+  )
 
   // --- Body ---
 
+  set math.equation(numbering: "(1)")
   set par(justify: true)
 
-  outline()
+  show figure: it => pad(bottom: 1em, it)
+
   body
+
+  // --- Bibliography ---
+
+  show " and ": " e "
+  show " Available: ": " Disponível em: "
 
   pagebreak(weak: true)
   bibliography("refs.bib")
