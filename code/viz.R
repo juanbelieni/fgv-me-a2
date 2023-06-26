@@ -121,10 +121,10 @@ data %>%
   labs(
     x = "Percentual de evasão",
     y = "Proporção",
-    fill = "Grau acadêmico"
+    fill = "Tipo de administração",
   )
 
-save_plot("evasao-por-tipo-admnistracao")
+save_plot("evasao-por-tipo-administracao")
 
 # Plot: QQ plot dos resíduos de Pearson da regressão Binomial Negativa
 
