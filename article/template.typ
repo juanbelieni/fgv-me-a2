@@ -62,11 +62,7 @@
   set table(inset: 0.6em)
 
   show figure: it => pad(y: 0.5em, it)
-  show raw: it => if it.at("block") {
-    block(breakable: false, it)
-  } else {
-    it
-  }
+  show raw.where(block: true): it => block(breakable: false, it)
 
   body
 

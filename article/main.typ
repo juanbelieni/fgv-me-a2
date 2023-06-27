@@ -3,7 +3,7 @@
 #show: project.with(
   title: "Modelagem da evasão\nno ensino superior no Brasil",
   authors: (
-    (name: "Juan Belieni", email: "juanbelieni@gmail.com", affiliation: "FGV/EMAp"),
+    (name: "Juan Belieni", email: "juan.araujo@fgv.edu.br", affiliation: "FGV/EMAp"),
   ),
   date: datetime.today()
 )
@@ -12,7 +12,7 @@
 
 A evasão no ensino superior é um problema que afeta muitos cursos acadêmicos pelo Brasil, e possui diversas naturezas ao nível do estudante, tais como vocacionais, relativos ao desempenho ou até sociais~@ambiel-2021. No entanto, fatores macros como a modalidade de ensino do curso e o tipo de administração da instituição de ensino também podem ajudar a entender as dinâmicas do processo de evasão.
 
-Modelar esse fenômeno dá a possibilidade de entender como esse fatores se relacionam e influenciam a quantidade de desistências, permitindo identificar situações anômalas ou até tendências indesejáveis, que possibilitaria planos de ação a nível nacional para o desenvolvimento de programas de combate a evasão em instituições públicas e privadas.
+Modelar esse fenômeno dá a possibilidade de compreender como esse fatores se relacionam e influenciam a quantidade de desistências, permitindo identificar situações anômalas ou até tendências indesejáveis, que possibilitaria o desenvolvimento de planos de ação a nível nacional para a criação e aprimoramento de programas de combate a evasão em instituições públicas e privadas.
 
 Dessa forma, a discussão e a modelagem iniciada nesse trabalho busca explorar os dados oferecidos pelo Inep para entender o comportamento da variável de interesse (quantidade de desistências de um determinado curso) por meio modelos de regressão para contagem, utilizando as variáveis disponíveis para estimar seu valor e depois analisando os coeficientes das covariáveis para entender seu comportamento.
 
@@ -83,7 +83,7 @@ E[D_i | bold(X)_i]     = & mu_i, \
 "Var"(D_i | bold(X)_i) = & phi.alt dot mu_i.
 $
 
-Outra alternativa é construir uma regressão com a distribuição Binomial Negativa, que também possui um parâmetro de dispersão. Por possuir uma parametrização relativamente parecida com a regressão de Poisson, como será visto posteriormente, e não depender de métodos de quasi-verossimilhança, foi escolhida sua utilização.
+Outra alternativa é construir uma regressão com a distribuição Binomial Negativa, que também possui um parâmetro de dispersão. Por possuir uma parametrização relativamente parecida com a regressão de Poisson, como será visto posteriormente, e por não depender de métodos de quasi-verossimilhança, foi escolhida sua utilização.
 
 === Regressão Binomial Negativa <sec:reg-bin-neg>
 
@@ -96,7 +96,7 @@ $
 
 Essa definição dá à regressão Binomial Negativa uma maior flexibilidade em modelar o comportamento envolvendo a variável de interesse e as covariáveis, se comparado com uma regressão de Poisson tradicional~@gardner-1995, sendo ainda possível utilizar máximo verossimilhança para estimar os parâmetros necessários.
 
-No _R_, a biblioteca _MASS_ oferece uma implementação que permite ajustar modelos desse tipo~@r-mass, que pode ser feito utilizando o método `glm.nb`, uma modificação do método `glm` que estima um parâmetro $theta = 1/kappa$ por máxima verossimilhança, utilizado posteriormente para ajustar os coeficientes e outros valores associados ao modelo.
+No _R_, a biblioteca _MASS_ oferece uma implementação que permite ajustar modelos desse tipo~@r-mass, que pode ser feito utilizando o método `glm.nb`, uma modificação do método `glm` que estima um parâmetro $theta = 1/kappa$ por máxima verossimilhança, utilizado posteriormente para ajustar os coeficientes e calcular outros valores associados ao modelo.
 
 == Escolha das covariáveis <sec:covariaveis>
 
@@ -153,7 +153,7 @@ Em relação às variáveis categóricas, algumas destas acabam tendo naturalmen
   ]
 ) <img:evasao-por-regiao>
 
-A diferença que se destaca, nesse caso, é a maior representatividade no percentual de evasão quando a classificação de região não se aplica. No conjunto de dados, essa classificação significa que o curso é ofertado a distância. Dessa maneira, conseguímos utilizar a variável que informa a modalidade de ensino para codificar essa discrepância.
+A diferença que se destaca, nesse caso, é uma maior média do percentual de evasão quando a classificação de região não se aplica. No conjunto de dados, essa classificação significa que o curso é ofertado a distância. Dessa maneira, conseguímos utilizar a variável que informa a modalidade de ensino para codificar essa discrepância.
 
 Também é possível observar variações significativas no percentual de evasão quando analisamos esse valor em relação ao tipo de administração na @img:desistencias-por-grau-academico.
 
@@ -188,7 +188,7 @@ Antes de mostrar seus resultados, um modelo de regressão Poisson análogo ao ap
 
 = Resultados
 
-O modelo de regressãode  Poisson foi ajustado em _R_ utilizando a biblioteca padrão com o seguinte comando:
+O modelo de regressão de Poisson foi ajustado em _R_ utilizando a biblioteca padrão com o seguinte comando:
 
 ```R
 glm(
@@ -210,20 +210,20 @@ Por padrão, o _R_ considera que o parâmetro de dispersão é igual a 1~@r-base
   table(
     columns: (2fr, 1fr, 1fr, 1fr),
     [*Covariável*]                      , [*Estimativa*] , [*Erro padrão*] , [*_z-value_*] ,
-    [Intercepto]                        , [-3.0975812] , [0.1103542] , [ -28.069] ,
-    [Modalidade de ensino (presencial)] , [-0.0946402] , [0.0033707] , [ -28.077] ,
-    [Tipo de administração (Privada)]   , [ 0.3438696] , [0.0152867] , [  22.495] ,
-    [Tipo de administração (Pública)]   , [ 0.1222539] , [0.0153891] , [   7.944] ,
-    [Prazo de integralização (2 anos)]  , [ 1.7122496] , [0.1120452] , [  15.282] ,
-    [Prazo de integralização (3 anos)]  , [ 2.1894498] , [0.1091304] , [  20.063] ,
-    [Prazo de integralização (4 anos)]  , [ 2.2939549] , [0.1091393] , [  21.019] ,
-    [Prazo de integralização (5 anos)]  , [ 2.3490929] , [0.1091144] , [  21.529] ,
-    [Prazo de integralização (6 anos)]  , [ 2.3586600] , [0.1091174] , [  21.616] ,
-    [Prazo de integralização (7 anos)]  , [ 1.8257122] , [0.1095745] , [  16.662] ,
-    [Prazo de integralização (8 anos)]  , [ 2.3518163] , [0.1153984] , [  20.380] ,
-    [Prazo de integralização (9 anos)]  , [ 2.4495912] , [0.1095914] , [  22.352] ,
-    [Prazo de integralização (10 anos)] , [ 2.4405378] , [0.1103832] , [  22.110] ,
-    [Quantidade de ingressantes (log)]  , [ 0.9768587] , [0.0008204] , [1190.769] ,
+    [Intercepto]                        , [-3,0975812] , [0,1103542] , [ -28,069] ,
+    [Modalidade de ensino (presencial)] , [-0,0946402] , [0,0033707] , [ -28,077] ,
+    [Tipo de administração (Privada)]   , [ 0,3438696] , [0,0152867] , [  22,495] ,
+    [Tipo de administração (Pública)]   , [ 0,1222539] , [0,0153891] , [   7,944] ,
+    [Prazo de integralização (2 anos)]  , [ 1,7122496] , [0,1120452] , [  15,282] ,
+    [Prazo de integralização (3 anos)]  , [ 2,1894498] , [0,1091304] , [  20,063] ,
+    [Prazo de integralização (4 anos)]  , [ 2,2939549] , [0,1091393] , [  21,019] ,
+    [Prazo de integralização (5 anos)]  , [ 2,3490929] , [0,1091144] , [  21,529] ,
+    [Prazo de integralização (6 anos)]  , [ 2,3586600] , [0,1091174] , [  21,616] ,
+    [Prazo de integralização (7 anos)]  , [ 1,8257122] , [0,1095745] , [  16,662] ,
+    [Prazo de integralização (8 anos)]  , [ 2,3518163] , [0,1153984] , [  20,380] ,
+    [Prazo de integralização (9 anos)]  , [ 2,4495912] , [0,1095914] , [  22,352] ,
+    [Prazo de integralização (10 anos)] , [ 2,4405378] , [0,1103832] , [  22,110] ,
+    [Quantidade de ingressantes (log)]  , [ 0,9768587] , [0,0008204] , [1190,769] ,
   ),
   caption: "Estimativa dos coeficientes do modelo de regressão de Poisson.",
 ) <tab:modelo-poisson>
@@ -236,20 +236,20 @@ O método `glm.nb` começou estimando o valor de 5,9732 para o parâmetro $theta
   table(
     columns: (2fr, 1fr, 1fr, 1fr),
     [*Covariável*]                      , [*Estimativa*] , [*Erro padrão*] , [*_z-value_*] ,
-    [Intercepto]                        , [-3.183171] , [0.172868] , [-18.414] ,
-    [Modalidade de ensino (presencial)] , [-0.151741] , [0.016649] , [ -9.114] ,
-    [Tipo de administração (Privada)]   , [ 0.300960] , [0.037509] , [  8.024] ,
-    [Tipo de administração (Pública)]   , [ 0.110856] , [0.037685] , [  2.942] ,
-    [Prazo de integralização (2 anos)]  , [ 1.939972] , [0.177700] , [ 10.917] ,
-    [Prazo de integralização (3 anos)]  , [ 2.364277] , [0.167391] , [ 14.124] ,
-    [Prazo de integralização (4 anos)]  , [ 2.517725] , [0.167434] , [ 15.037] ,
-    [Prazo de integralização (5 anos)]  , [ 2.511231] , [0.167270] , [ 15.013] ,
-    [Prazo de integralização (6 anos)]  , [ 2.507559] , [0.167309] , [ 14.988] ,
-    [Prazo de integralização (7 anos)]  , [ 1.949313] , [0.169240] , [ 11.518] ,
-    [Prazo de integralização (8 anos)]  , [ 2.540016] , [0.192112] , [ 13.222] ,
-    [Prazo de integralização (9 anos)]  , [ 2.635591] , [0.169901] , [ 15.513] ,
-    [Prazo de integralização (10 anos)] , [ 2.658740] , [0.174851] , [ 15.206] ,
-    [Quantidade de ingressantes (log)]  , [ 0.976705] , [0.003276] , [298.181] ,
+    [Intercepto]                        , [-3,183171] , [0,172868] , [-18,414] ,
+    [Modalidade de ensino (presencial)] , [-0,151741] , [0,016649] , [ -9,114] ,
+    [Tipo de administração (Privada)]   , [ 0,300960] , [0,037509] , [  8,024] ,
+    [Tipo de administração (Pública)]   , [ 0,110856] , [0,037685] , [  2,942] ,
+    [Prazo de integralização (2 anos)]  , [ 1,939972] , [0,177700] , [ 10,917] ,
+    [Prazo de integralização (3 anos)]  , [ 2,364277] , [0,167391] , [ 14,124] ,
+    [Prazo de integralização (4 anos)]  , [ 2,517725] , [0,167434] , [ 15,037] ,
+    [Prazo de integralização (5 anos)]  , [ 2,511231] , [0,167270] , [ 15,013] ,
+    [Prazo de integralização (6 anos)]  , [ 2,507559] , [0,167309] , [ 14,988] ,
+    [Prazo de integralização (7 anos)]  , [ 1,949313] , [0,169240] , [ 11,518] ,
+    [Prazo de integralização (8 anos)]  , [ 2,540016] , [0,192112] , [ 13,222] ,
+    [Prazo de integralização (9 anos)]  , [ 2,635591] , [0,169901] , [ 15,513] ,
+    [Prazo de integralização (10 anos)] , [ 2,658740] , [0,174851] , [ 15,206] ,
+    [Quantidade de ingressantes (log)]  , [ 0,976705] , [0,003276] , [298,181] ,
   ),
   caption: "Estimativa dos coeficientes do modelo de regressão Binomial Negativa.",
 ) <tab:modelo-bin-neg>
@@ -271,7 +271,7 @@ Também é interessante analisar o modelo por meio da utilização de um gráfic
 
 É notável que o modelo não se ajustou bem aos dados, pois existe um desvio considerável dos pontos em relação da linha de identidade. Isso pode ter acontecido por diversos fatores, sendo um deles a hipótese dos dados não seguirem realmente uma distribuição Binomial Negativa.
 
-Também podemos avaliar a hipótese de normalidade dos resíduos por meio de um teste estatístico. Utilizando o teste de Anderson–Darling~@anderson-2011 para essa finalidade, calculamos seu p-valor em _R_ utilizando o método `ad.test` da biblioteca _nortest_ @r-nortest, que considera que esse valor é menor que 2.2e-16. Ou seja, temos bastante evidência para rejeitar a normalidade dos resíduos.
+Também podemos avaliar a hipótese de normalidade dos resíduos por meio de um teste estatístico. Utilizando o teste de Anderson–Darling~@anderson-2011 para essa finalidade, calculamos seu p-valor em _R_ utilizando o método `ad.test` da biblioteca _nortest_ @r-nortest, que considera que esse valor é menor que 2,2e-16. Ou seja, temos bastante evidência para rejeitar a normalidade dos resíduos.
 
 É possível visualizar esse comportamento dos resíduos ao analisar sua densidade (@img:densidade-residuos). Mesmo tendo uma distribuição aparentemente gaussiana, a média tende para a direita e a cauda esquerda é mais pesada.
 
