@@ -59,6 +59,7 @@
 
   set math.equation(numbering: "(1)")
   set par(justify: true)
+  set table(inset: 0.6em)
 
   show figure: it => pad(y: 0.5em, it)
   show raw: it => if it.at("block") {

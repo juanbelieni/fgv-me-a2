@@ -10,11 +10,11 @@
 
 = Introdução
 
-A evasão no ensino superior é um problema que afeta muitos cursos acadêmicos pelo Brasil, e possui diversas naturezas ao nível do estudante, tais como vocacionais, relativos ao desempenho ou até sociais~@ambiel-2021. No entanto, fatores macros também podem ajudar a entender efeitos globais do fenômeno de evasão, como a modalidade de ensino do curso e o tipo de administração da instituição de ensino.
+A evasão no ensino superior é um problema que afeta muitos cursos acadêmicos pelo Brasil, e possui diversas naturezas ao nível do estudante, tais como vocacionais, relativos ao desempenho ou até sociais~@ambiel-2021. No entanto, fatores macros como a modalidade de ensino do curso e o tipo de administração da instituição de ensino também podem ajudar a entender as dinâmicas do processo de evasão.
 
 Modelar esse fenômeno dá a possibilidade de entender como esse fatores se relacionam e influenciam a quantidade de desistências, permitindo identificar situações anômalas ou até tendências indesejáveis, que possibilitaria planos de ação a nível nacional para o desenvolvimento de programas de combate a evasão em instituições públicas e privadas.
 
-Dessa forma, a discussão e a modelagem iniciada nesse trabalho busca explorar os dados oferecidos pelo Inep para entender o comportamento dessa variáveis em modelos de regressão para contagem em relação a quantidade de desistências em cada curso do conjunto de dados.
+Dessa forma, a discussão e a modelagem iniciada nesse trabalho busca explorar os dados oferecidos pelo Inep para entender o comportamento da variável de interesse (quantidade de desistências de um determinado curso) por meio modelos de regressão para contagem, utilizando as variáveis disponíveis para estimar seu valor e depois analisando os coeficientes das covariáveis para entender seu comportamento.
 
 = Dados <sec:dados>
 
@@ -47,7 +47,7 @@ Na @sec:covariaveis será visto quais informações serão utilizadas para ajust
 
 = Modelagem
 
-O foco dessa modelagem é entender a influência da região e do curso na quantidade de desistências. Mais especificamente, será modelado o número acumulado de desistências até o ano de integralização para um determinado curso $i$, que será denominado de $D_i$.
+O foco dessa modelagem é entender a influência de algumas variáveis na quantidade de desistências dos cursos presentes no conjunto de dados. Mais especificamente, será modelado o número acumulado de desistências até o ano de integralização para um determinado curso $i$, que será denominado de $D_i$.
 
 A escolha do ano de integralização como limite superior para o cálculo do número acumulado de desistências vem da necessidade de estipular uma base de comparação geral entre os diversos cursos, que possuem prazos de integralização diferentes.
 
@@ -65,7 +65,7 @@ onde $bold(beta) = (beta_0, bold(beta)')$ é o vetor de parâmetros a ser estima
 
 Essa técnica é conhecida como regressão de Poisson e a estimação dos parâmetros ocorre por meio de máxima verossimilhança. Por não possuir fórmula fechada, a estimação depende métodos numéricos (no _R_, é utilizado _Fisher's scoring_).
 
-No entanto, diferente de outras distribuições como a Normal e a Binomial Negativa, não possui um parâmetro de dispersão. Por esse motivo, em uma regressão de Poisson, assume-se que os dados são equidispersos, i.e., que a média condicional seja igual à variância condicional~@coxe-2009. Caso isso não seja verdade e esse fato não for levado em conta, podemos acabar tendo valores incorretos para as estimativas de erro padrão, para os intervalos de confiança, etc.
+No entanto, diferente de outras distribuições como a Normal e a Binomial Negativa, a distribuição de Poisson não possui um parâmetro de dispersão. Por esse motivo, em uma regressão de Poisson, assume-se que os dados são equidispersos, i.e., que a média condicional seja igual à variância condicional~@coxe-2009. Caso isso não seja verdade e esse fato não for levado em conta, podemos acabar tendo valores incorretos para as estimativas de erro padrão, para os intervalos de confiança, etc.
 
 É possível verificar um caso de sobredispersão ou subdispersão em um modelo já treinado por meio de um teste proposto por Cameron e Trivedi~@cameron-1990 de seguinte teor:
 
@@ -83,7 +83,7 @@ E[D_i | bold(X)_i]     = & mu_i, \
 "Var"(D_i | bold(X)_i) = & phi.alt dot mu_i.
 $
 
-Outra alternativa é construir um GLM com a distribuição Binomial Negativa, que também possui um parâmetro de dispersão. Por possuir uma parametrização relativamente parecida com a regressão de Poisson, como será visto posteriormente, e não depender de métodos de quasi-verossimilhança, foi escolhida sua utilização.
+Outra alternativa é construir uma regressão com a distribuição Binomial Negativa, que também possui um parâmetro de dispersão. Por possuir uma parametrização relativamente parecida com a regressão de Poisson, como será visto posteriormente, e não depender de métodos de quasi-verossimilhança, foi escolhida sua utilização.
 
 === Regressão Binomial Negativa <sec:reg-bin-neg>
 
@@ -94,9 +94,9 @@ E[D_i | bold(X)_i]     = & mu_i = exp(beta_0 + bold(X)_i^T bold(beta')), \
 "Var"(D_i | bold(X)_i) = & mu_i + kappa mu_i^2.
 $
 
-Esta definição dá à regressão Binomial Negativa uma maior flexibilidade em modelar o comportamento envolvendo a variável de interesse e as covariáveis, se comparado com uma regressão de Poisson tradicional~@gardner-1995, sendo ainda possível utilizar máximo verossimilhança para estimar os parâmetros necessários.
+Essa definição dá à regressão Binomial Negativa uma maior flexibilidade em modelar o comportamento envolvendo a variável de interesse e as covariáveis, se comparado com uma regressão de Poisson tradicional~@gardner-1995, sendo ainda possível utilizar máximo verossimilhança para estimar os parâmetros necessários.
 
-No _R_, a biblioteca _MASS_ oferece uma implementação que permite ajustar modelos desse tipo~@r-mass, que pode ser feito utilizando o método `glm.nb`, uma modificação do método `glm` que estima um parâmetro $theta = 1/kappa$ por máxima verossimilhança, utilizado posteriormente para ajustar os parâmetros e outros valores associados ao modelo.
+No _R_, a biblioteca _MASS_ oferece uma implementação que permite ajustar modelos desse tipo~@r-mass, que pode ser feito utilizando o método `glm.nb`, uma modificação do método `glm` que estima um parâmetro $theta = 1/kappa$ por máxima verossimilhança, utilizado posteriormente para ajustar os coeficientes e outros valores associados ao modelo.
 
 == Escolha das covariáveis <sec:covariaveis>
 
@@ -114,7 +114,7 @@ Já explorado na @sec:dados, a base de dados possui informações relativas ao c
 
 Porém, é importante notar que, diferente do que acontece em uma regressão linear tradicional, uma mudança unitária do valor de uma covariável qualquer $beta_j$ não resulta em uma mudança aditiva proporcional a $beta_j$, e sim acarreta uma mudança multiplicativa de fator $e^(beta_j)$~@coxe-2009. Dessa forma, devido à forte relação linear entre as variáveis, é interessante modelar a covariável relativa à quantidade de ingressantes como $log(dot)$.
 
-Outra variável que deveria apresentar uma relevância considerável é o prazo de integralização. No entanto, não existe uma relação tão óbvia entre essa quantidade e a quantidade de desistências, como é possível ver na figura @img:desistencias-por-prazo-integralizacao. Além disso, apenas os cursos com prazo de integralização entre 3 e 6 anos apresentam uma quantidade considerável de dados.
+Outra variável que deveria apresentar uma relevância considerável é o prazo de integralização. No entanto, não existe uma forma funcional óbvia entre essa quantidade e a quantidade de desistências, como é possível ver na figura @img:desistencias-por-prazo-integralizacao. Além disso, apenas os cursos com prazo de integralização entre 3 e 6 anos apresentam uma quantidade considerável de dados.
 
 #grid(
   columns: (1fr, 1fr),
@@ -139,9 +139,9 @@ Outra variável que deveria apresentar uma relevância considerável é o prazo 
   ) <img:evasao-por-prazo-integralizacao>]
 )
 
-Se formos visualizar essa variável em relação ao percentual de evasão (@img:evasao-por-prazo-integralizacao), fica ainda menos óbvio qual seria sua forma funcional. Portanto, é perceptível que modelar essa variável como um valor não-categórico não seria o ideal.
+Se formos visualizar essa variável em relação ao percentual de evasão (@img:evasao-por-prazo-integralizacao), fica ainda menos óbvio qual seria a forma ideal de representar esse valor de maneira ordinária. Portanto, é perceptível que modelar essa variável como um valor não-categórico não seria o ideal.
 
-Em relação às variáveis categóricas, algumas destas acabam tendo naturalmente muitas opções de valores possíveis, como a variável contendo a UF onde o curso é ofertado. Por esse motivo, essas variáveis foram preteridas em favor de outras mais gerais, como o da região, no caso citado. Para a última, nota-se uma ligeira diferença em relação ao percentual de evasão, como é possível observar na @img:evasao-por-regiao.
+Em relação às variáveis categóricas, algumas destas acabam tendo naturalmente muitas opções de valores possíveis, como a variável contendo a UF onde o curso é ofertado. Por esse motivo, essas variáveis foram preteridas em favor de outras mais gerais, como a da região, no caso citado. Para a última, nota-se uma ligeira variação do percentual de evasão, como é possível observar na @img:evasao-por-regiao.
 
 #figure(
   image(
@@ -155,7 +155,7 @@ Em relação às variáveis categóricas, algumas destas acabam tendo naturalmen
 
 A diferença que se destaca, nesse caso, é a maior representatividade no percentual de evasão quando a classificação de região não se aplica. No conjunto de dados, essa classificação significa que o curso é ofertado a distância. Dessa maneira, conseguímos utilizar a variável que informa a modalidade de ensino para codificar essa discrepância.
 
-Também é possível ver alterações significativas no percentual de evasão quando analisamos esse valor em relação ao tipo de administração na @img:desistencias-por-grau-academico.
+Também é possível observar variações significativas no percentual de evasão quando analisamos esse valor em relação ao tipo de administração na @img:desistencias-por-grau-academico.
 
 #figure(
   image(
@@ -171,7 +171,7 @@ Com essa investigação, as variáveis escolhidas serão transformadas para form
 
 == Modelo final <sec:modelo-final>
 
-Por fim, o modelo escolhido foi uma regressão Binomial Negativa que leva em conta as influências das variáveis da quantidade de ingressantes, do prazo de integralização, da região e do tipo de adiministração da universidade. No _R_, tal modelo é construído da seguinte maneira:
+Por fim, o modelo escolhido foi uma regressão Binomial Negativa que leva em conta as influências das variáveis da quantidade de ingressantes, do prazo de integralização, da modalidade de ensino e do tipo de administração da universidade. No _R_, tal modelo é construído da seguinte maneira:
 
 ```R
 glm.nb(
@@ -209,7 +209,6 @@ Por padrão, o _R_ considera que o parâmetro de dispersão é igual a 1~@r-base
 #figure(
   table(
     columns: (2fr, 1fr, 1fr, 1fr),
-    inset: 0.75em,
     [*Covariável*]                      , [*Estimativa*] , [*Erro padrão*] , [*_z-value_*] ,
     [Intercepto]                        , [-3.0975812] , [0.1103542] , [ -28.069] ,
     [Modalidade de ensino (presencial)] , [-0.0946402] , [0.0033707] , [ -28.077] ,
@@ -229,14 +228,13 @@ Por padrão, o _R_ considera que o parâmetro de dispersão é igual a 1~@r-base
   caption: "Estimativa dos coeficientes do modelo de regressão de Poisson.",
 ) <tab:modelo-poisson>
 
-Realizando o teste de dispersão apresentado na @sec:reg-poisson com o modelo acima, temos que seu p-valor é menor que 2,2e16, com o valor 6,948751 para $phi.alt$. Ou seja, temos bastante evidência para rejeitar a hipótese nula. Com isso, o modelo final especificado na @sec:modelo-final pode ser finalmente ajustado.
+Realizando o teste de dispersão apresentado na @sec:reg-poisson com o modelo acima, temos que seu p-valor é menor que 2,2e16, com o valor estimado de 6,948751 para $phi.alt$. Ou seja, temos bastante evidência para rejeitar a hipótese nula. Com isso, o modelo final especificado na @sec:modelo-final pode ser finalmente ajustado.
 
 O método `glm.nb` começou estimando o valor de 5,9732 para o parâmetro $theta$. Depois disso, o modelo ajustado, com AIC igual a 215.558 e BIC igual a 215.681, apresentou como estimativa dos coeficientes os valores presentes na @tab:modelo-bin-neg.
 
 #figure(
   table(
     columns: (2fr, 1fr, 1fr, 1fr),
-    inset: 0.75em,
     [*Covariável*]                      , [*Estimativa*] , [*Erro padrão*] , [*_z-value_*] ,
     [Intercepto]                        , [-3.183171] , [0.172868] , [-18.414] ,
     [Modalidade de ensino (presencial)] , [-0.151741] , [0.016649] , [ -9.114] ,
@@ -256,7 +254,7 @@ O método `glm.nb` começou estimando o valor de 5,9732 para o parâmetro $theta
   caption: "Estimativa dos coeficientes do modelo de regressão Binomial Negativa.",
 ) <tab:modelo-bin-neg>
 
-É possível perceber que os dois métodos apresentaram valores muito próximos para os coeficientes, o que é o esperado dado que os dois métodos apresentam a mesma modelagem para a média. Outro comportamento esperado é o erro padrão menor para os coeficientes, pois, como visto na @sec:reg-poisson, modelos de regressão de Poisson com dados sobredispersos acabam atribuindo valores menos corretos para essa informação se comparados com modelos que consideram esse fenômeno.
+É possível perceber que os dois métodos apresentaram valores muito próximos para os coeficientes, o que é o esperado dado que os dois métodos apresentam a mesma expressão para a média. Outro comportamento esperado é o erro padrão menor para os coeficientes, pois, como visto na @sec:reg-poisson, modelos de regressão de Poisson com dados sobredispersos acabam atribuindo valores menos corretos para essa informação se comparados com modelos que consideram esse fenômeno.
 
 Também é interessante analisar o modelo por meio da utilização de um gráfico de quantis dos resíduos. Para esse diagnóstico, o cálculo dos resíduos foi feito utilizado o _randomized quantile residual_ (RQR), proposto por Dunn e Smyth em 1996~@dunn-1996, que serve para trabalhar com modelos de contagem~@feng-2020, com a visualização disponível na @img:qq-rqr, no qual os resíduos foram calculados utilizando o método `qresiduals` da biblioteca _countreg_~@r-countreg.
 
@@ -273,7 +271,7 @@ Também é interessante analisar o modelo por meio da utilização de um gráfic
 
 É notável que o modelo não se ajustou bem aos dados, pois existe um desvio considerável dos pontos em relação da linha de identidade. Isso pode ter acontecido por diversos fatores, sendo um deles a hipótese dos dados não seguirem realmente uma distribuição Binomial Negativa.
 
-Essa hipótese pode ser avaliada ao testar se os resíduos são normalmente distribuídos. Utilizando o teste de Anderson–Darling~@anderson-2011 para essa finalidade, calculamos seu p-valor em _R_ utilizando o método `ad.test` da biblioteca @r-nortest, que considera que esse valor é menor que 2.2e-16. Ou seja, temos bastante evidência para rejeitar a normalidade dos resíduos.
+Também podemos avaliar a hipótese de normalidade dos resíduos por meio de um teste estatístico. Utilizando o teste de Anderson–Darling~@anderson-2011 para essa finalidade, calculamos seu p-valor em _R_ utilizando o método `ad.test` da biblioteca _nortest_ @r-nortest, que considera que esse valor é menor que 2.2e-16. Ou seja, temos bastante evidência para rejeitar a normalidade dos resíduos.
 
 É possível visualizar esse comportamento dos resíduos ao analisar sua densidade (@img:densidade-residuos). Mesmo tendo uma distribuição aparentemente gaussiana, a média tende para a direita e a cauda esquerda é mais pesada.
 
