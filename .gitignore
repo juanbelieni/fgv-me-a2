@@ -1,6 +1,7 @@
 # --- Important ---
 
 *.pdf
+!article.pdf
 *.png
 
 # --- R ---
